@@ -198,14 +198,18 @@ log "SSH configuration syntax and effective values are valid."
 restart_ssh_service() {
   if command -v systemctl >/dev/null 2>&1; then
     if systemctl list-unit-files ssh.service --no-legend 2>/dev/null | grep -q '^ssh\.service'; then
-      systemctl restart ssh
-      RESTARTED_SERVICE=ssh
-      return 0
+      if systemctl restart ssh; then
+        RESTARTED_SERVICE=ssh
+        return 0
+      fi
+      warn "systemctl restart ssh failed; trying another service name."
     fi
     if systemctl list-unit-files sshd.service --no-legend 2>/dev/null | grep -q '^sshd\.service'; then
-      systemctl restart sshd
-      RESTARTED_SERVICE=sshd
-      return 0
+      if systemctl restart sshd; then
+        RESTARTED_SERVICE=sshd
+        return 0
+      fi
+      warn "systemctl restart sshd failed; trying the service command."
     fi
   fi
 
